@@ -1,0 +1,35 @@
+name: Deploy to S3 and Invalidate CloudFront
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Upload & Invalidate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: "us-east-1"
+          role-to-assume: ${{ secrets.AWS_ROLE_DEPLOY }}
+          role-duration-seconds: 900
+
+      - name: Sync files to S3
+        run: |
+          aws s3 sync index.html s3://frontend-devops-medellin-prod \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --delete
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id here! \
+            --paths "/*"
