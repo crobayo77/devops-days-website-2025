@@ -23,13 +23,10 @@ jobs:
 
       - name: Sync files to S3
         run: |
-          aws s3 sync index.html s3://frontend-devops-medellin-prod \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --delete
+          aws s3 sync index.html s3://frontend-devops-medellin-prod
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id here! \
+            --distribution-id E3SDJP2KPOBCF3 \
             --paths "/*"
